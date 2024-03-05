@@ -4,7 +4,7 @@
 apt install redis -y
 service redis stop
 
-## 因 monitor 引起的 redis内存占用飙升
+## 因 monitor 引起的 redis内存占用飙升    --新版没这个问题了
 
 模拟实验：
 1.  开启一个空的Redis(最简，直接redis-server)
@@ -31,32 +31,36 @@ blocked_clients:0
 mem_clients_slaves:0
 mem_clients_normal:49694
 ```
- 
+
 2. 开启一个monitor：
 ```sh
-redis-cli -h 127.0.0.1 -p 6379 monitor
+redis-cli  monitor
 ```
 
 3. 使用redis-benchmark：
 ```sh
-redis-benchmark -h 127.0.0.1 -p 6379 -c 500 -n 200000
+redis-benchmark  -c 500 -n 200000
 ```
-4. 观察
-(1) info memory：内存一直增加，直到benchmark结束，monitor输出完毕，但是used_memory_peak_human（历史峰值）依然很高--观察附件中日志
-(2)info clients: client_longest_output_list： 一直在增加，直到benchmark结束，monitor输出完毕，才变为0 --观察附件中日志
-(3)redis-cli -h host -p port client list | grep "monitor" omem一直很高，直到benchmark结束，monitor输出完毕，才变为0 --观察附件中日志
-监控脚本：
+4. 观察  --新版没有下面问题了
+(1) info memory：内存一直增加，直到benchmark结束，monitor输出完毕，但是 used_memory_peak_human （历史峰值）依然很高 
+(2)info clients: client_longest_output_list ： 一直在增加，直到benchmark结束，monitor输出完毕，才变为0  
+(3)redis-cli client list | grep "monitor" omem一直很高，直到benchmark结束, monitor输出完毕，才变为0 
 
+监控脚本：
 ```sh
 while [ 1 == 1 ]
 do
 now=$(date "+%Y-%m-%d_%H:%M:%S")
-echo "=========================${now}==============================="
-echo " #Client-Monitor"
-redis-cli -h 127.0.0.1 -p 6379 client list | grep monitor
-redis-cli -h 127.0.0.1 -p 6379 info clients
-redis-cli -h 127.0.0.1 -p 6379 info memory
+echo "=========================${now}===============================" >>1.log
+echo " #Client-Monitor" >>1.log
+redis-cli  client list | grep monitor >>1.log
+redis-cli  info clients >>1.log
+redis-cli  info memory >>1.log
 #休息100毫秒
-usleep 100000
+#usleep 100000
+sleep 0.1
 done
 ```
+
+日志文件： [monitor.log](data/monitor.log) 、 [noMonitor.log](data/noMonitor.log) 
+
