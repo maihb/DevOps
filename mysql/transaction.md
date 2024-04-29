@@ -2,6 +2,10 @@
 
 查看当前事务隔离级别：
 SELECT @@global.tx_isolation;
+查看当前用的是哪个库
+SELECT DATABASE();
+查看日志等级
+show variables like 'log_error_verbosity'; --默认 3
 
 ```sql
 -- 创建表
@@ -45,14 +49,26 @@ BEGIN
 END$$
 DELIMITER ;
 
--- 调用存储过程插入数据
+-- 调用存储过程插入数据 insertTestData(开始位置，条数)
 CALL insertTestData(1, 1000000);
+-- 插入 2400w 数据
+CALL insertTestData(10000001, 23000000);
+CALL insertTestData(16054003, 100);
+
+-- 查看数据空间大小
+select
+TABLE_NAME,
+concat(truncate(data_length/1024/1024,2),' MB') as data_size,
+concat(truncate(index_length/1024/1024,2),' MB') as index_size
+from information_schema.tables
+where TABLE_SCHEMA = 'test' and table_name = 'wode'
+order by data_length desc;
+
 -- 删掉存储过程
 DROP PROCEDURE insertTestData;
 
 -- 清空表数据
 TRUNCATE TABLE wode;
 OPTIMIZE TABLE wode;
-
 
 ```
