@@ -7,6 +7,16 @@ SELECT DATABASE();
 查看日志等级
 show variables like 'log_error_verbosity'; --默认 3
 
+开启 swap
+
+```sh
+dd if=/dev/zero of=/mnt/swap bs=1M count=4096
+chmod 0600 /mnt/swap 
+mkswap /mnt/swap 
+swapon /mnt/swap
+echo '/mnt/swap swap swap defaults 0 0' >>/etc/fstab
+```
+
 ```sql
 -- 创建表
 CREATE TABLE `wode` (
@@ -49,11 +59,12 @@ BEGIN
 END$$
 DELIMITER ;
 
--- 调用存储过程插入数据 insertTestData(开始位置，条数)
+-- 调用存储过程插入数据 insertTestData(开始位置，条数) 100w
 CALL insertTestData(1, 1000000);
--- 插入 2400w 数据
-CALL insertTestData(10000001, 23000000);
-CALL insertTestData(16054003, 100);
+-- +500w 数据， 共 600w
+CALL insertTestData(1000001, 5000000);
+-- +400w，共 1kw   ， 没开 swap 情况下，卡死了
+CALL insertTestData(6000001, 4000000);       
 
 -- 查看数据空间大小
 select
