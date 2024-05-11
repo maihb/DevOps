@@ -35,7 +35,7 @@ INSERT INTO wode (username, password, phone, email, create_time) VALUES ('abc','
 INSERT INTO wode (username, password, phone, email, create_time) VALUES ("abc","sdf","12317231233" ,"mhb@qq.com",NOW()) ;
 select * from wode order by id DESC limit 3;
 -- 关闭自动提交事务
-SET autocommit=0;
+SET autocommit=0; SHOW VARIABLES LIKE 'autocommit';
 -- 插入数据
 DELIMITER $$
 CREATE PROCEDURE insertTestData(IN start INT, IN total INT)
